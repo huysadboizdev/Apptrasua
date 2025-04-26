@@ -5,7 +5,7 @@ export default function AuthLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen 
-        name="index"
+        name="login"
         options={{
           title: 'Login',
           headerShown: false
