@@ -62,6 +62,16 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen 
+        name="order"
+        options={{ 
+          title: "Order",
+          tabBarIcon: ({color, size}) => (
+            <Ionicons name="receipt-outline" size={size} color={color}/>
+          ),
+        }}
+      />
       
       <Tabs.Screen 
         name="profile"
@@ -72,6 +82,7 @@ export default function TabLayout() {
           ),
         }}
       />
+      
       
       <Tabs.Screen
         name="setting"

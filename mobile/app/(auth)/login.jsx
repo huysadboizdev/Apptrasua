@@ -1,20 +1,59 @@
 import { View, Text, Image, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, Alert } from 'react-native';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Ionicons } from "@expo/vector-icons";
 import COLORS from '../../constants/colors';
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import styles from "../../assets/styles/login.styles";
 import { useAuthStore } from "../../store/authStore";
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false); // New state for remembering login
   const { login, isLoading } = useAuthStore();
+  const router = useRouter();
+
+  // Check if there is any stored login info
+  useEffect(() => {
+    const loadStoredData = async () => {
+      const storedEmail = await AsyncStorage.getItem('email');
+      const storedPassword = await AsyncStorage.getItem('password');
+      if (storedEmail && storedPassword) {
+        setEmail(storedEmail);
+        setPassword(storedPassword);
+        setRememberMe(true); // If data exists, set remember me to true
+      }
+    };
+
+    loadStoredData();
+  }, []);
 
   const handleLogin = async () => {
     const result = await login(email, password);
-    if (!result.success) Alert.alert("Error", result.error);
+    if (!result.success) {
+      Alert.alert("Lỗi", result.error);
+      return;
+    }
+
+    // Save the login details if 'remember me' is checked
+    if (rememberMe) {
+      await AsyncStorage.setItem('email', email);
+      await AsyncStorage.setItem('password', password);
+    } else {
+      // Clear storage if 'remember me' is not checked
+      await AsyncStorage.removeItem('email');
+      await AsyncStorage.removeItem('password');
+    }
+
+    const { role } = useAuthStore.getState();
+
+    if (role === 'admin') {
+      router.replace('/admin');
+    } else {
+      router.replace('/(tabs)');
+    }
   };
 
   return (
@@ -45,9 +84,9 @@ export default function Login() {
                   style={styles.inputIcon}
                 />
                 <TextInput
-                  style={styles.input}
-                  placeholder="Enter your email"
-                  placeholderTextColor={COLORS.placeholderText}
+                  style={[styles.input, { color: '#333' }]}  // Text nhập sẽ rõ hơn
+                  placeholder="Nhập email của bạn"
+                  placeholderTextColor="#555"  // Placeholder đậm hơn
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
@@ -58,7 +97,7 @@ export default function Login() {
 
             {/* PASSWORD */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Password</Text>
+              <Text style={styles.label}>Mật khẩu</Text>
               <View style={styles.inputContainer}>
                 <Ionicons
                   name="lock-closed-outline"
@@ -67,14 +106,13 @@ export default function Login() {
                   style={styles.inputIcon}
                 />
                 <TextInput
-                  style={styles.input}
-                  placeholder="Enter your password"
-                  placeholderTextColor={COLORS.placeholderText}
+                  style={[styles.input, { color: '#333' }]}
+                  placeholder="Nhập mật khẩu của bạn"
+                  placeholderTextColor="#555"
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                 />
-
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
                   style={styles.eyeIcon}
@@ -88,6 +126,21 @@ export default function Login() {
               </View>
             </View>
 
+            {/* Remember me checkbox */}
+            <View style={styles.inputGroup}>
+              <TouchableOpacity
+                onPress={() => setRememberMe(!rememberMe)}
+                style={styles.rememberMeContainer}
+              >
+                <Ionicons
+                  name={rememberMe ? "checkbox" : "checkbox-outline"}
+                  size={20}
+                  color={COLORS.primary}
+                />
+                <Text style={styles.rememberMeText}>Lưu mật khẩu</Text>
+              </TouchableOpacity>
+            </View>
+
             {/* Login Button */}
             <TouchableOpacity
               style={styles.button}
@@ -97,16 +150,16 @@ export default function Login() {
               {isLoading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.buttonText}>Login</Text>
+                <Text style={styles.buttonText}>Đăng nhập</Text>
               )}
             </TouchableOpacity>
 
             {/* Footer */}
             <View style={styles.footer}>
-              <Text style={styles.footerText}>Don't have an account?</Text>
-              <Link href="/signup" asChild>
+              <Text style={styles.footerText}>Chưa có tài khoản?</Text>
+              <Link href="/(auth)/signup" asChild>
                 <TouchableOpacity>
-                  <Text style={styles.link}>Sign Up</Text>
+                  <Text style={styles.link}>Đăng ký</Text>
                 </TouchableOpacity>
               </Link>
             </View>

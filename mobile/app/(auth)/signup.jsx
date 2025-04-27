@@ -6,7 +6,6 @@ import COLORS from '../../constants/colors';
 import { Link, useRouter } from "expo-router";
 import { useAuthStore } from '../../store/authStore';
 
-
 export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -16,7 +15,6 @@ export default function Signup() {
   const { register } = useAuthStore();
   const router = useRouter();
 
-  // Add Animation state
   const fadeAnim = useState(new Animated.Value(1))[0];
 
   const validateEmail = (email) => {
@@ -31,30 +29,28 @@ export default function Signup() {
   const handleSignup = async () => {
     try {
       if (!name || !email || !password) {
-        Alert.alert("Error", "Please fill in all fields");
+        Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin");
         return;
       }
 
       if (!validateEmail(email)) {
-        Alert.alert("Error", "Please enter a valid email address");
+        Alert.alert("Lỗi", "Vui lòng nhập email hợp lệ");
         return;
       }
 
       if (!validatePassword(password)) {
-        Alert.alert("Error", "Password must be at least 8 characters long");
+        Alert.alert("Lỗi", "Mật khẩu phải có ít nhất 8 ký tự");
         return;
       }
 
       setIsLoading(true);
-      console.log('Sending signup request with:', { name, email, password });
 
       const result = await register(name, email, password);
-      console.log('Signup result:', result);
 
       if (result.success) {
         Alert.alert(
-          "Success",
-          "Account created successfully!",
+          "Thành công",
+          "Tạo tài khoản thành công!",
           [
             {
               text: "OK",
@@ -71,11 +67,11 @@ export default function Signup() {
           ]
         );
       } else {
-        Alert.alert("Error", result.error || "Registration failed");
+        Alert.alert("Lỗi", result.error || "Đăng ký thất bại");
       }
     } catch (error) {
-      console.error('Signup error:', error);
-      Alert.alert("Error", error.message || "An error occurred during signup");
+      console.error('Lỗi đăng ký:', error);
+      Alert.alert("Lỗi", error.message || "Có lỗi xảy ra trong quá trình đăng ký");
     } finally {
       setIsLoading(false);
     }
@@ -92,13 +88,13 @@ export default function Signup() {
             {/* Header Section */}
             <View style={styles.header}>
               <Text style={styles.title}>Coffee Dino☕</Text>
-              <Text style={styles.subtitle}>Welcome to the world of food</Text>
+              <Text style={styles.subtitle}>Nơi Tình Yêu Bắt Đầu</Text>
             </View>
 
             <View style={styles.formContainer}>
               {/* Name */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Name</Text>
+                <Text style={styles.label}>Tên</Text>
                 <View style={styles.inputContainer}>
                   <Ionicons
                     name="person-outline"
@@ -107,9 +103,9 @@ export default function Signup() {
                     style={styles.inputIcon}
                   />
                   <TextInput
-                    style={styles.input}
-                    placeholder="Enter your name"
-                    placeholderTextColor={COLORS.placeholderText}
+                    style={[styles.input, { color: '#333' }]} // chữ nhập sẽ đậm
+                    placeholder="Nhập tên của bạn"
+                    placeholderTextColor="#555" // placeholder rõ hơn
                     value={name}
                     onChangeText={setName}
                     autoCapitalize="words"
@@ -128,9 +124,9 @@ export default function Signup() {
                     style={styles.inputIcon}
                   />
                   <TextInput
-                    style={styles.input}
-                    placeholder="Enter your email"
-                    placeholderTextColor={COLORS.placeholderText}
+                    style={[styles.input, { color: '#333' }]}
+                    placeholder="Nhập email của bạn"
+                    placeholderTextColor="#555"
                     value={email}
                     onChangeText={setEmail}
                     keyboardType="email-address"
@@ -141,7 +137,7 @@ export default function Signup() {
 
               {/* Password */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Password</Text>
+                <Text style={styles.label}>Mật khẩu</Text>
                 <View style={styles.inputContainer}>
                   <Ionicons
                     name="lock-closed-outline"
@@ -150,9 +146,9 @@ export default function Signup() {
                     style={styles.inputIcon}
                   />
                   <TextInput
-                    style={styles.input}
-                    placeholder="Enter your password"
-                    placeholderTextColor={COLORS.placeholderText}
+                    style={[styles.input, { color: '#333' }]}
+                    placeholder="Nhập mật khẩu của bạn"
+                    placeholderTextColor="#555"
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
@@ -179,15 +175,15 @@ export default function Signup() {
                 {isLoading ? (
                   <ActivityIndicator color='#fff' />
                 ) : (
-                  <Text style={styles.buttonText}>Sign Up</Text>
+                  <Text style={styles.buttonText}>Đăng ký</Text>
                 )}
               </TouchableOpacity>
 
               {/* Footer */}
               <View style={styles.footer}>
-                <Text style={styles.footerText}>Already have an account?</Text>
+                <Text style={styles.footerText}>Đã có tài khoản?</Text>
                 <Link href="/(auth)/login">
-                  <Text style={styles.link}>Login</Text>
+                  <Text style={styles.link}>Đăng nhập</Text>
                 </Link>
               </View>
             </View>

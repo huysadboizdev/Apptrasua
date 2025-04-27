@@ -60,7 +60,11 @@ const addProduct = async (req, res) => {
 
         let imageUrl = '';
         if (imageFile) {
-            imageUrl = imageFile.path; // Hoặc nếu bạn dùng Cloudinary, lấy URL từ đó
+            // Upload hình ảnh lên Cloudinary
+            const result = await cloudinary.uploader.upload(imageFile.path, {
+                folder: "products", // Bạn có thể chỉ định thư mục trong Cloudinary nếu muốn
+            });
+            imageUrl = result.secure_url; // Lấy URL ảnh đã upload
         }
 
         const newProduct = new productModel({
@@ -69,7 +73,7 @@ const addProduct = async (req, res) => {
             price,
             category,
             stock,
-            image: imageUrl
+            image: imageUrl, // Lưu URL ảnh vào database
         });
 
         await newProduct.save();
@@ -151,6 +155,24 @@ const deleteProduct = async (req, res) => {
     }
 };
 
+// Lấy tất cả sản phẩm
+const getAllProducts = async (req, res) => {
+    try {
+        const products = await productModel.find(); // Tìm tất cả sản phẩm trong database
+
+        if (products.length === 0) {
+            return res.status(404).json({ success: false, message: 'No products found' });
+        }
+
+        res.json({ success: true, products });
+    } catch (error) {
+        console.log(error);
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+
+
 // Lấy tất cả đơn hàng
 const getAllOrders = async (req, res) => {
     try {
@@ -209,6 +231,7 @@ export {
     editProduct,
     updateProduct,
     deleteProduct,
+    getAllProducts,
     getAllOrders,
     getOrderById,
     updateOrderStatus
