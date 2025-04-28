@@ -5,13 +5,13 @@ import COLORS from '../../constants/colors';
 import { Link, useRouter } from "expo-router";
 import styles from "../../assets/styles/login.styles";
 import { useAuthStore } from "../../store/authStore";
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false); // New state for remembering login
+  const [rememberMe, setRememberMe] = useState(false);
   const { login, isLoading } = useAuthStore();
   const router = useRouter();
 
@@ -23,7 +23,7 @@ export default function Login() {
       if (storedEmail && storedPassword) {
         setEmail(storedEmail);
         setPassword(storedPassword);
-        setRememberMe(true); // If data exists, set remember me to true
+        setRememberMe(true);
       }
     };
 
@@ -50,7 +50,7 @@ export default function Login() {
     const { role } = useAuthStore.getState();
 
     if (role === 'admin') {
-      router.replace('/admin');
+      router.replace('/(admin)');
     } else {
       router.replace('/(tabs)');
     }
@@ -84,9 +84,9 @@ export default function Login() {
                   style={styles.inputIcon}
                 />
                 <TextInput
-                  style={[styles.input, { color: '#333' }]}  // Text nhập sẽ rõ hơn
+                  style={[styles.input, { color: '#333' }]}
                   placeholder="Nhập email của bạn"
-                  placeholderTextColor="#555"  // Placeholder đậm hơn
+                  placeholderTextColor="#555"
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"

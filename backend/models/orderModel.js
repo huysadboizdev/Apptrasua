@@ -3,13 +3,13 @@ import mongoose from 'mongoose';
 const orderSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // Liên kết với bảng User
+        ref: 'User',
         required: true
     },
     items: [{
         productId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Product', // Liên kết với bảng Product
+            ref: 'Product',
             required: true
         },
         quantity: {
@@ -28,7 +28,7 @@ const orderSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Pending', 'Completed', 'Cancelled'],
+        enum: ['Pending', 'Accepted', 'Delivery', 'Successful', 'Cancelled'],
         default: 'Pending'
     },
     paymentMethod: {

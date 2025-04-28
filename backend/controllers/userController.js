@@ -449,6 +449,7 @@ const checkout = async (req, res) => {
             paymentMethod,
             address,
             phone,
+            note: req.body.note || '',
             status: 'Pending'
         });
 

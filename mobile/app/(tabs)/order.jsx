@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image, Alert, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image, Alert, TouchableOpacity, Platform } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuthStore } from '../../store/authStore';
 import { formatCurrency } from '../../utils/formatCurrency';
@@ -7,6 +7,8 @@ import axios from 'axios';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import COLORS from '../../constants/colors';
+import { SIZES } from '../../constants/sizes';
 
 // Hàm format ngày tháng
 const formatDate = (dateString) => {
@@ -106,6 +108,98 @@ const OrderScreen = () => {
         }, [])
     );
 
+    // Thêm hàm kiểm tra trạng thái đơn hàng
+    const checkOrderStatus = async () => {
+        try {
+            const storedToken = await AsyncStorage.getItem('token');
+            if (!storedToken) return;
+
+            console.log('Checking order status...');
+            
+            const response = await axios.get('http://192.168.19.104:4000/api/user/get-orders', {
+                headers: {
+                    'Authorization': `Bearer ${storedToken}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.data.success) {
+                const newOrders = response.data.orders;
+                const oldOrders = orders;
+
+                console.log('Current orders:', oldOrders);
+                console.log('New orders:', newOrders);
+
+                // Kiểm tra từng đơn hàng để xem trạng thái có thay đổi không
+                newOrders.forEach(newOrder => {
+                    const oldOrder = oldOrders.find(o => o._id === newOrder._id);
+                    
+                    if (oldOrder) {
+                        console.log('Comparing order:', {
+                            orderId: newOrder._id,
+                            oldStatus: oldOrder.status,
+                            newStatus: newOrder.status
+                        });
+
+                        if (oldOrder.status !== newOrder.status) {
+                            console.log('Status changed:', {
+                                orderId: newOrder._id,
+                                from: oldOrder.status,
+                                to: newOrder.status
+                            });
+
+                            // Hiển thị thông báo tương ứng với trạng thái mới
+                            switch (newOrder.status) {
+                                case 'Accepted':
+                                    Alert.alert(
+                                        'Thông báo',
+                                        'Đơn hàng của bạn đã được xác nhận',
+                                        [{ text: 'OK' }]
+                                    );
+                                    break;
+                                case 'Delivery':
+                                    Alert.alert(
+                                        'Thông báo',
+                                        'Đơn hàng của bạn đang được giao',
+                                        [{ text: 'OK' }]
+                                    );
+                                    break;
+                                case 'Successful':
+                                    Alert.alert(
+                                        'Thông báo',
+                                        'Đơn hàng của bạn đã được giao thành công',
+                                        [{ text: 'OK' }]
+                                    );
+                                    break;
+                                case 'Cancelled':
+                                    Alert.alert(
+                                        'Thông báo',
+                                        'Đơn hàng của bạn đã bị hủy',
+                                        [{ text: 'OK' }]
+                                    );
+                                    break;
+                            }
+                        }
+                    }
+                });
+
+                setOrders(newOrders);
+            }
+        } catch (error) {
+            console.error('Error checking order status:', error);
+        }
+    };
+
+    // Thêm interval để kiểm tra trạng thái đơn hàng mỗi 10 giây
+    useEffect(() => {
+        const interval = setInterval(() => {
+            checkOrderStatus();
+        }, 10000); // Giảm thời gian kiểm tra xuống 10 giây
+
+        return () => clearInterval(interval);
+    }, [orders]);
+
     const getStatusColor = (status) => {
         switch (status) {
             case 'Pending':
@@ -122,9 +216,13 @@ const OrderScreen = () => {
     const getStatusText = (status) => {
         switch (status) {
             case 'Pending':
-                return 'Đang xử lý';
-            case 'Completed':
-                return 'Đã hoàn thành';
+                return 'Đang chờ xác nhận';
+            case 'Accepted':
+                return 'Đã xác nhận';
+            case 'Delivery':
+                return 'Đang giao hàng';
+            case 'Successful':
+                return 'Đã giao hàng thành công';
             case 'Cancelled':
                 return 'Đã hủy';
             default:
@@ -346,13 +444,15 @@ const OrderScreen = () => {
                         </View>
                     </View>
 
-                    {/* Ghi chú */}
-                    {item.note && (
-                        <View style={styles.noteContainer}>
-                            <Text style={styles.noteLabel}>Ghi chú:</Text>
-                            <Text style={styles.note}>{item.note}</Text>
-                        </View>
-                    )}
+                    {/* Ghi chú đơn hàng */}
+                    <View style={styles.noteContainer}>
+                        <Text style={styles.noteLabel}>Ghi chú:</Text>
+                        <Text style={styles.noteText}>
+                            {item.note && item.note.trim().length > 0 
+                                ? item.note 
+                                : 'Không có ghi chú'}
+                        </Text>
+                    </View>
                 </View>
 
                 {/* Nút hủy đơn hàng và đặt lại */}
@@ -394,10 +494,10 @@ const OrderScreen = () => {
     return (
         <View style={styles.container}>
             {/* Navigation Bar */}
-            <View style={styles.navBar}>
-                <View style={styles.navTitleContainer}>
-                    <Ionicons name="list" size={24} color="#4CAF50" />
-                    <Text style={styles.navTitle}>Đơn hàng của tôi</Text>
+            <View style={styles.navbar}>
+                <View style={styles.navbarLeft}>
+                    <Ionicons name="list" size={28} color="#fff" />
+                    <Text style={styles.navbarTitle}>Đơn hàng của tôi</Text>
                 </View>
                 <TouchableOpacity 
                     style={styles.refreshButton}
@@ -407,7 +507,7 @@ const OrderScreen = () => {
                     <Ionicons 
                         name="refresh" 
                         size={24} 
-                        color="#4CAF50" 
+                        color="#fff" 
                     />
                 </TouchableOpacity>
             </View>
@@ -438,33 +538,42 @@ const OrderScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: COLORS.lightWhite,
     },
-    navBar: {
+    navbar: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 40,
-        paddingHorizontal: 16,
-        backgroundColor: '#E8F5E9',
-        borderBottomWidth: 1,
-        borderBottomColor: '#C8E6C9',
+        paddingHorizontal: SIZES.medium,
+        paddingTop: Platform.OS === 'ios' ? 50 : 40,
+        paddingBottom: SIZES.medium,
+        backgroundColor: COLORS.primary,
+        borderBottomLeftRadius: SIZES.radius,
+        borderBottomRightRadius: SIZES.radius,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
         height: 150,
     },
-    navTitleContainer: {
+    navbarLeft: {
         flexDirection: 'row',
         alignItems: 'center',
+        gap: SIZES.small,
     },
-    navTitle: {
-        fontSize: 24,
-        fontWeight: '600',
-        marginLeft: 8,
-        color: '#2E7D32',
+    navbarTitle: {
+        fontSize: SIZES.h3,
+        fontWeight: 'bold',
+        color: COLORS.white,
     },
     refreshButton: {
-        padding: 8,
-        borderRadius: 20,
-        backgroundColor: '#E8F5E9',
+        padding: SIZES.small,
+        backgroundColor: 'transparent',
+        borderRadius: SIZES.radius,
     },
     loadingContainer: {
         flex: 1,
@@ -612,6 +721,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f8f8',
         padding: 12,
         borderRadius: 8,
+        marginTop: 12,
     },
     noteLabel: {
         fontSize: 14,
@@ -619,7 +729,7 @@ const styles = StyleSheet.create({
         marginBottom: 4,
         color: '#333',
     },
-    note: {
+    noteText: {
         fontSize: 14,
         color: '#666',
         fontStyle: 'italic',

@@ -33,7 +33,7 @@ export default function TabLayout() {
       <Tabs.Screen 
         name="index"
         options={{ 
-          title: "Home",
+          title: "Trang Chủ",
           tabBarIcon: ({color, size}) => (
             <Ionicons name="home-outline" size={size} color={color}/>
           ),
@@ -56,7 +56,7 @@ export default function TabLayout() {
       <Tabs.Screen 
         name="cart"
         options={{ 
-          title: "Cart",
+          title: "Giỏ Hàng",
           tabBarIcon: ({color, size}) => (
             <Ionicons name="cart-outline" size={size} color={color}/>
           ),
@@ -66,7 +66,7 @@ export default function TabLayout() {
       <Tabs.Screen 
         name="order"
         options={{ 
-          title: "Order",
+          title: "Đơn Hàng",
           tabBarIcon: ({color, size}) => (
             <Ionicons name="receipt-outline" size={size} color={color}/>
           ),
@@ -76,7 +76,7 @@ export default function TabLayout() {
       <Tabs.Screen 
         name="profile"
         options={{ 
-          title: "Profile",
+          title: "Thông Tin",
           tabBarIcon: ({color, size}) => (
             <Ionicons name="person-outline" size={size} color={color}/>
           ),
@@ -87,7 +87,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="setting"
         options={{ 
-          title: "Setting",
+          title: "Cài đặt",
           tabBarIcon: ({color, size}) => (
             <Ionicons name="settings-outline" size={size} color={color}/>
           ),

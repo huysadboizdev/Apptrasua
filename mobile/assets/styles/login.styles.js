@@ -1,6 +1,7 @@
 // styles/login.styles.js
 import { StyleSheet, Dimensions } from "react-native";
 import COLORS from "../../constants/colors";
+import { SIZES } from '../../constants/sizes';
 
 const { width } = Dimensions.get("window");
 
@@ -113,6 +114,35 @@ const styles = StyleSheet.create({
   link: {
     color: COLORS.primary,
     fontWeight: "600",
+  },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    padding: SIZES.medium,
+    borderRadius: SIZES.radius,
+    marginTop: SIZES.medium,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  googleIcon: {
+    width: 24,
+    height: 24,
+    marginRight: SIZES.small,
+  },
+  googleButtonText: {
+    color: '#333',
+    fontSize: SIZES.body3,
+    fontWeight: '500',
   },
 });
 
